@@ -25,7 +25,9 @@
   "homepage": "https://github.com/NguyenVanPhi92/trello-app-api#readme",
   "dependencies": {
     "@babel/runtime": "^7.18.6",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "mongodb": "^4.8.0",
     "nodemon": "^2.0.19"
   },
   "devDependencies": {
