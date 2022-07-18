@@ -1,19 +1,25 @@
 import express from "express";
-import { mapOrder } from "*/utilities/sorts";
-import { connectDB } from "./config/mongodb";
-
-const app = express();
-
-const hostname = "localhost";
-const port = 8017;
+import { connectDB, getDB } from "./config/mongodb";
+import { env } from "./config/evnirontment";
+import { BoardModel } from "*/models/board.model";
 
 // run connect DB
-connectDB().catch(console.log);
+connectDB()
+  .then(() => console.log("Connect successfully to database server"))
+  .then(() => bootServer()) // khi thành công thì start server DB
+  .catch((error) => {
+    console.log("Error connect database: ", error);
+    process.exit(1); // khi có lỗi thì dừng ứng dụng
+  });
 
-app.get("/", (req, res) => {
-  res.send("<h1>hello word</h1>");
-});
+const bootServer = () => {
+  const app = express();
 
-app.listen(port, hostname, () => {
-  console.log("server is running");
-});
+  app.get("/test", async (req, res) => {
+    res.send("<h1>hello word</h1>");
+  });
+
+  app.listen(env.APP_PORT, env.APP_HOST, () => {
+    console.log("server is running");
+  });
+};
