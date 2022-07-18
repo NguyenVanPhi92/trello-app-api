@@ -5,8 +5,9 @@ import { getDB } from "*/config/mongodb";
 const cardCollectionName = "cards";
 const cardCollectionSchema = Joi.object({
   boardId: Joi.string().required(),
-  title: Joi.string().required().min(3).max(20),
-  cardOrder: Joi.array().items(Joi.string()).default([]),
+  columnId: Joi.string().required(),
+  title: Joi.string().required().min(3).max(50).trim(),
+  cover: Joi.string().default(null),
   createAt: Joi.date().timestamp().default(Date.now()),
   updatedAt: Joi.date().timestamp().default(null),
   _destroy: Joi.boolean().default(false),
@@ -25,10 +26,15 @@ const createNew = async (data) => {
       .collection(cardCollectionName)
       .insertOne(value);
 
-    return result;
+    if (result.acknowledged) {
+      let res = await getDB()
+        .collection(cardCollectionName)
+        .findOne(result.insertedId);
+      return res;
+    }
   } catch (error) {
-    console.log("Error insert data: ", error);
+    throw new Error(error);
   }
 };
 
-export const ColumnModel = { createNew };
+export const CardModel = { createNew };

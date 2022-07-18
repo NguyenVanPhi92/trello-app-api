@@ -1,13 +1,13 @@
 import Joi from "joi";
+import { ObjectId } from "mongodb";
 import { getDB } from "*/config/mongodb";
 
 //Define Column collection
 const columnCollectionName = "columns";
 const columnCollectionSchema = Joi.object({
   boardId: Joi.string().required(),
-  columnId: Joi.string().required(),
-  title: Joi.string().required().min(3).max(20),
-  cover: Joi.string().default(null),
+  title: Joi.string().required().min(3).max(20).trim(),
+  cardOrder: Joi.array().items(Joi.string()).default([]),
   createAt: Joi.date().timestamp().default(Date.now()),
   updatedAt: Joi.date().timestamp().default(null),
   _destroy: Joi.boolean().default(false),
@@ -28,8 +28,25 @@ const createNew = async (data) => {
 
     return result;
   } catch (error) {
-    console.log("Error insert data: ", error);
+    throw new Error(error);
   }
 };
 
-export const ColumnModel = { createNew };
+const update = async (id, data) => {
+  try {
+    const result = await getDB()
+      .collection(columnCollectionName)
+      .findOneAndUpdate(
+        { _id: ObjectId(id) },
+        { $set: data },
+        { returnOriginal: false } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+      );
+    console.log("update column: ", result.value);
+
+    return result.value;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const ColumnModel = { createNew, update };
