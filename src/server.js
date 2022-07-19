@@ -1,7 +1,9 @@
 import express from "express";
-import { connectDB, getDB } from "./config/mongodb";
+import cors from "cors";
+import { connectDB } from "./config/mongodb";
 import { env } from "./config/evnirontment";
 import { apiV1 } from "*/routes/v1/";
+import { corsOptions } from "./config/cors";
 
 // run connect DB
 connectDB()
@@ -15,6 +17,9 @@ connectDB()
 const bootServer = () => {
   const app = express();
 
+  // ngăn chặc error CorsOrigin
+
+  app.use(cors(corsOptions));
   // Enable req.body data
   app.use(express.json());
   // route API v1
