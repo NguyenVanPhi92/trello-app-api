@@ -1,13 +1,20 @@
 import { ColumnModel } from "*/models/column.model";
+import { BoardModel } from "*/models/board.model";
 
 const createNew = async (data) => {
   try {
-    const result = await ColumnModel.createNew(data);
-    return result;
-  } catch (error) {
-    // console.log(error);
+    const newColumn = await ColumnModel.createNew(data);
 
-    throw new Error(error); //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
+    // update columnsOrder Array in board collections
+    await BoardModel.pushColumnOrder(
+      newColumn.boardId.toString(),
+      newColumn._id.toString()
+    );
+
+    return newColumn;
+  } catch (error) {
+    //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
+    throw new Error(error);
   }
 };
 
@@ -17,12 +24,12 @@ const update = async (id, data) => {
       ...data,
       updatedAt: Date.now(),
     };
+
     const result = await ColumnModel.update(id, updateData);
     return result;
   } catch (error) {
-    // console.log(error);
-
-    throw new Error(error); //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
+    //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
+    throw new Error(error);
   }
 };
 

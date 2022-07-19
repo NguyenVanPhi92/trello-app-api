@@ -1,5 +1,8 @@
 import Joi from "joi";
 import { getDB } from "*/config/mongodb";
+import { ObjectId } from "mongodb";
+import { ColumnModel } from "./column.model";
+import { CardModel } from "./card.model";
 
 //Define Board collection
 const boardCollectionName = "boards";
@@ -11,6 +14,7 @@ const boardCollectionSchema = Joi.object({
   _destroy: Joi.boolean().default(false),
 });
 
+// validate data receive from client
 const validateSchema = async (data) => {
   return await boardCollectionSchema.validateAsync(data, { abortEarly: false });
 };
@@ -18,6 +22,7 @@ const validateSchema = async (data) => {
 const createNew = async (data) => {
   try {
     const value = await validateSchema(data);
+
     const result = await getDB()
       .collection(boardCollectionName)
       .insertOne(value);
@@ -28,11 +33,77 @@ const createNew = async (data) => {
         .findOne(result.insertedId);
       return res;
     }
-
-    // return result;
   } catch (error) {
     throw new Error(error);
   }
 };
 
-export const BoardModel = { createNew };
+/**
+ *thêm _id bảng con vào bảng cha
+ *
+ * @param {string} boardId
+ * @param {string} newColumnId
+ * @returns
+ */
+const pushColumnOrder = async (boardId, newColumnId) => {
+  try {
+    const result = await getDB()
+      .collection(boardCollectionName)
+      .findOneAndUpdate(
+        { _id: ObjectId(boardId) },
+        { $push: { columnOrder: newColumnId } },
+        { returnOriginal: false } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+      );
+
+    return result.value;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// lấy ra 1 Board với all data bên trong nó
+const getFullBoard = async (boardId) => {
+  try {
+    const result = await getDB()
+      .collection(boardCollectionName)
+      .aggregate([
+        { $match: { _id: ObjectId(boardId) } }, // lấy ra item có id là ...
+
+        // ... sau đó lấy ra hết các pah62n tử bên trong item đó
+        // {
+        //   $addFields: {
+        //     _id: { $toString: "$_id" }, // ghi đè khi trùng key and chuyển obj _id của mongoDb sang string
+        //   },
+        // },
+        // get columns in board
+        {
+          $lookup: {
+            from: ColumnModel.columnCollectionName, //collection name.
+            localField: "_id",
+            foreignField: "boardId",
+            as: "columns", // name return
+          },
+        },
+        // get card in columns in board
+        {
+          $lookup: {
+            from: CardModel.cardCollectionName, //collection name.
+            localField: "_id",
+            foreignField: "boardId",
+            as: "cards", // name return
+          },
+        },
+      ])
+      .toArray();
+
+    return result[0] || {}; // nếu kh có item thì trả về mảng rỗng
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const BoardModel = {
+  createNew,
+  getFullBoard,
+  pushColumnOrder,
+};

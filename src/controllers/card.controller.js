@@ -1,5 +1,5 @@
 import { CardService } from "*/services/card.service";
-import { HttpStatusCode } from "*/utilities/constants";
+import { HttpStatusCode } from "*/utilities/constants_http";
 
 const createNew = async (req, res) => {
   try {
@@ -7,8 +7,6 @@ const createNew = async (req, res) => {
 
     res.status(HttpStatusCode.OK).json(result);
   } catch (error) {
-    // console.log("hi", error);
-
     res.status(HttpStatusCode.INTERNAL_SERVER).json({
       errors: error.message,
     });
