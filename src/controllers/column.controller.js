@@ -1,13 +1,12 @@
 import { ColumnService } from "*/services/column.service";
-import { HttpStatusCode } from "*/utilities/constants";
+import { HttpStatusCode } from "*/utilities/constants_http";
 
 const createNew = async (req, res) => {
   try {
     const result = await ColumnService.createNew(req.body);
+
     res.status(HttpStatusCode.OK).json(result);
   } catch (error) {
-    // console.log("hi", error);
-
     res.status(HttpStatusCode.INTERNAL_SERVER).json({
       errors: error.message,
     });
@@ -21,8 +20,6 @@ const update = async (req, res) => {
     const result = await ColumnService.update(id, req.body);
     res.status(HttpStatusCode.OK).json(result);
   } catch (error) {
-    // console.log("hi", error);
-
     res.status(HttpStatusCode.INTERNAL_SERVER).json({
       errors: error.message,
     });

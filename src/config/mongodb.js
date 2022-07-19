@@ -22,6 +22,8 @@ export const getDB = () => {
   return dbInstance;
 };
 
+// LOGGER
+
 // const listDatabase = async (client) => {
 // const databasesList = await client.db().admin().listDatabases();
 //   console.log(databasesList);

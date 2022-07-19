@@ -1,13 +1,20 @@
 import { CardModel } from "*/models/card.model";
+import { ColumnModel } from "*/models/column.model";
 
 const createNew = async (data) => {
   try {
-    const result = await CardModel.createNew(data);
-    return result;
-  } catch (error) {
-    // console.log(error);
+    const newCard = await CardModel.createNew(data);
 
-    throw new Error(error); //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
+    // update columnsOrder Array in board collections
+    await ColumnModel.pushCardOrder(
+      newCard.columnId.toString(),
+      newCard._id.toString()
+    );
+
+    return newCard;
+  } catch (error) {
+    //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
+    throw new Error(error);
   }
 };
 

@@ -1,7 +1,6 @@
 import express from "express";
 import { connectDB, getDB } from "./config/mongodb";
 import { env } from "./config/evnirontment";
-import { BoardModel } from "*/models/board.model";
 import { apiV1 } from "*/routes/v1/";
 
 // run connect DB
@@ -16,7 +15,7 @@ connectDB()
 const bootServer = () => {
   const app = express();
 
-  //  Enable req.body data
+  // Enable req.body data
   app.use(express.json());
   // route API v1
   app.use("/v1", apiV1);
