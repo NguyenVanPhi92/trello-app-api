@@ -27,12 +27,20 @@ const createNew = async (data) => {
       .collection(boardCollectionName)
       .insertOne(value);
 
-    if (result.acknowledged) {
-      let res = await getDB()
-        .collection(boardCollectionName)
-        .findOne(result.insertedId);
-      return res;
-    }
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// find one
+const findOneById = async (id) => {
+  try {
+    const result = await getDB()
+      .collection(boardCollectionName)
+      .findOne({ _id: ObjectId(id) });
+
+    return result;
   } catch (error) {
     throw new Error(error);
   }
@@ -52,7 +60,7 @@ const pushColumnOrder = async (boardId, newColumnId) => {
       .findOneAndUpdate(
         { _id: ObjectId(boardId) },
         { $push: { columnOrder: newColumnId } },
-        { returnOriginal: false } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+        { returnDocument: "after" } // returnDocument: 'after' => sẽ trả về bản ghi sau khi update
       );
 
     return result.value;
@@ -62,19 +70,25 @@ const pushColumnOrder = async (boardId, newColumnId) => {
 };
 
 // lấy ra 1 Board với all data bên trong nó
+// trường hợp này so sánh _id kiểu object
 const getFullBoard = async (boardId) => {
   try {
     const result = await getDB()
       .collection(boardCollectionName)
       .aggregate([
-        { $match: { _id: ObjectId(boardId) } }, // lấy ra item có id là ...
+        {
+          $match: {
+            _id: ObjectId(boardId),
+            _destroy: false,
+          },
+        }, // lấy ra item có id là ... và _destroy = false
 
-        // ... sau đó lấy ra hết các pah62n tử bên trong item đó
         // {
         //   $addFields: {
         //     _id: { $toString: "$_id" }, // ghi đè khi trùng key and chuyển obj _id của mongoDb sang string
         //   },
         // },
+        // ... sau đó lấy ra hết các phần tử bên trong item đó
         // get columns in board
         {
           $lookup: {
@@ -106,4 +120,5 @@ export const BoardModel = {
   createNew,
   getFullBoard,
   pushColumnOrder,
+  findOneById,
 };

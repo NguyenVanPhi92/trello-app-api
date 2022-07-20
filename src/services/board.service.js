@@ -1,9 +1,13 @@
 import { BoardModel } from "*/models/board.model";
+import { cloneDeep } from "lodash";
 
 const createNew = async (data) => {
   try {
-    const result = await BoardModel.createNew(data);
-    return result;
+    const createBoard = await BoardModel.createNew(data);
+    const getNewBoard = await BoardModel.findOneById(
+      createBoard.insertedId.toString()
+    );
+    return getNewBoard;
   } catch (error) {
     //dùng throw error để trả vế lỗi, như thế thì bên controller mới nhận được lỗi và in ra
     throw new Error(error);
@@ -18,17 +22,23 @@ const getFullBoard = async (boardId) => {
       throw new Error("Board not found!");
     }
 
+    const transformBoards = cloneDeep(board);
+    //Filter deleted columns
+    transformBoards.columns = transformBoards.columns.filter(
+      (column) => !column._destroy
+    );
+
     //Add card to each column
-    await board.columns.forEach((column) => {
-      column.cards = board.cards.filter(
+    transformBoards.columns.forEach((column) => {
+      column.cards = transformBoards.cards.filter(
         (c) => c.columnId.toString() === column._id.toString()
       );
     });
 
     // remove cards data from board when return
-    delete board.cards;
+    delete transformBoards.cards;
 
-    return board;
+    return transformBoards;
   } catch (error) {
     console.log(error.message);
     throw new Error(error);

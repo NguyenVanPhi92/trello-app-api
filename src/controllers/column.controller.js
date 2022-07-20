@@ -16,6 +16,8 @@ const createNew = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id);
+    console.log("controller: ", req.body);
 
     const result = await ColumnService.update(id, req.body);
     res.status(HttpStatusCode.OK).json(result);
