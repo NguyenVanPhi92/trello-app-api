@@ -21,6 +21,19 @@ const validateSchema = async (data) => {
   });
 };
 
+// find one
+const findOneById = async (id) => {
+  try {
+    const result = await getDB()
+      .collection(cardCollectionName)
+      .findOne({ _id: ObjectId(id) });
+
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const createNew = async (data) => {
   try {
     const validatedValue = await validateSchema(data);
@@ -36,15 +49,36 @@ const createNew = async (data) => {
       .collection(cardCollectionName)
       .insertOne(insertValue);
 
-    if (result.acknowledged) {
-      let res = await getDB()
-        .collection(cardCollectionName)
-        .findOne(result.insertedId);
-      return res;
-    }
+    return result;
   } catch (error) {
     throw new Error(error);
   }
 };
 
-export const CardModel = { cardCollectionName, createNew };
+/**
+ *
+ * @param {Array of string card id} ids
+ */
+const deleteMany = async (ids) => {
+  try {
+    const transformIds = ids.map((item) => ObjectId(item)); // map lại tất các id string => _id Object
+
+    const result = await getDB()
+      .collection(cardCollectionName)
+      .updateMany(
+        { _id: { $in: transformIds } }, // update những th có id trong mảng ids
+        { $set: { _destroy: true } }
+      );
+
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const CardModel = {
+  cardCollectionName,
+  createNew,
+  deleteMany,
+  findOneById,
+};

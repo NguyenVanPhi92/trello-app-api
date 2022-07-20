@@ -1,6 +1,6 @@
+import { getDB } from "*/config/mongodb";
 import Joi from "joi";
 import { ObjectId } from "mongodb";
-import { getDB } from "*/config/mongodb";
 
 //Define Column collection
 const columnCollectionName = "columns";
@@ -29,17 +29,26 @@ const createNew = async (data) => {
       ...validatedValue,
       boardId: ObjectId(validatedValue.boardId),
     };
+    console.log(insertValue);
 
     const result = await getDB()
       .collection(columnCollectionName)
       .insertOne(insertValue);
 
-    if (result.acknowledged) {
-      let res = await getDB()
-        .collection(columnCollectionName)
-        .findOne(result.insertedId);
-      return res;
-    }
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+// find one
+const findOneById = async (id) => {
+  try {
+    const result = await getDB()
+      .collection(columnCollectionName)
+      .findOne({ _id: ObjectId(id) });
+
+    return result;
   } catch (error) {
     throw new Error(error);
   }
@@ -59,7 +68,7 @@ const pushCardOrder = async (columnId, newCardId) => {
       .findOneAndUpdate(
         { _id: ObjectId(columnId) },
         { $push: { cardOrder: newCardId } },
-        { returnOriginal: false } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+        { returnDocument: "after" } // returnOriginal=false => sẽ trả về bản ghi sau khi update
       );
 
     return result.value;
@@ -70,14 +79,16 @@ const pushCardOrder = async (columnId, newCardId) => {
 
 const update = async (id, data) => {
   try {
+    const updateData = await { ...data, boardId: ObjectId(data.boardId) };
+    console.log("updateData : ", updateData.title);
     const result = await getDB()
       .collection(columnCollectionName)
       .findOneAndUpdate(
         { _id: ObjectId(id) }, // tìm item có id...
-        { $set: data }, // update data
-        { returnOriginal: false } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+        { $set: updateData }, // update data
+        { returnDocument: "after" } // returnOriginal=false => sẽ trả về bản ghi sau khi update
       );
-
+    console.log("updateData model: ", result.value.title);
     return result.value;
   } catch (error) {
     throw new Error(error);
@@ -89,4 +100,5 @@ export const ColumnModel = {
   createNew,
   update,
   pushCardOrder,
+  findOneById,
 };

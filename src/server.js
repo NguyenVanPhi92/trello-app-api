@@ -1,9 +1,9 @@
-import express from "express";
-import cors from "cors";
-import { connectDB } from "./config/mongodb";
-import { env } from "./config/evnirontment";
 import { apiV1 } from "*/routes/v1/";
+import cors from "cors";
+import express from "express";
 import { corsOptions } from "./config/cors";
+import { env } from "./config/evnirontment";
+import { connectDB } from "./config/mongodb";
 
 // run connect DB
 connectDB()
