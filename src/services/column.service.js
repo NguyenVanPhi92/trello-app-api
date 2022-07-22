@@ -1,20 +1,15 @@
-import { BoardModel } from "*/models/board.model";
-import { CardModel } from "*/models/card.model";
-import { ColumnModel } from "../models/column.model";
+import { BoardModel } from '*/models/board.model';
+import { CardModel } from '*/models/card.model';
+import { ColumnModel } from '../models/column.model';
 
 const createNew = async (data) => {
   try {
     const createdColumn = await ColumnModel.createNew(data);
-    const getNewColumn = await ColumnModel.findOneById(
-      createdColumn.insertedId.toString()
-    );
+    const getNewColumn = await ColumnModel.findOneById(createdColumn.insertedId.toString());
     getNewColumn.cards = []; // tạo trường dữ liệu này đển bên frontend để có thể sort
 
     // update columnsOrder Array in board collections
-    await BoardModel.pushColumnOrder(
-      getNewColumn.boardId.toString(),
-      getNewColumn._id.toString()
-    );
+    await BoardModel.pushColumnOrder(getNewColumn.boardId.toString(), getNewColumn._id.toString());
 
     return getNewColumn;
   } catch (error) {
@@ -30,7 +25,6 @@ const update = async (id, data) => {
       ...data,
       updatedAt: Date.now(),
     };
-    // console.log("service: ", updateData.title);
 
     if (updateData._id) delete updateData._id; // id kh được update nên xóa
     if (updateData.cards) delete updateData.cards; // không lưu cards array vào columns

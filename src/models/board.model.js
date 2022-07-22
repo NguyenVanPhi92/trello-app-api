@@ -1,11 +1,11 @@
-import Joi from "joi";
-import { getDB } from "*/config/mongodb";
-import { ObjectId } from "mongodb";
-import { ColumnModel } from "./column.model";
-import { CardModel } from "./card.model";
+import Joi from 'joi';
+import { getDB } from '*/config/mongodb';
+import { ObjectId } from 'mongodb';
+import { ColumnModel } from './column.model';
+import { CardModel } from './card.model';
 
 //Define Board collection
-const boardCollectionName = "boards";
+const boardCollectionName = 'boards';
 const boardCollectionSchema = Joi.object({
   title: Joi.string().required().min(3).max(20).trim(),
   columnOrder: Joi.array().items(Joi.string()).default([]),
@@ -23,9 +23,7 @@ const createNew = async (data) => {
   try {
     const value = await validateSchema(data);
 
-    const result = await getDB()
-      .collection(boardCollectionName)
-      .insertOne(value);
+    const result = await getDB().collection(boardCollectionName).insertOne(value);
 
     return result;
   } catch (error) {
@@ -60,7 +58,7 @@ const pushColumnOrder = async (boardId, newColumnId) => {
       .findOneAndUpdate(
         { _id: ObjectId(boardId) },
         { $push: { columnOrder: newColumnId } },
-        { returnDocument: "after" } // returnDocument: 'after' => sẽ trả về bản ghi sau khi update
+        { returnDocument: 'after' }, // returnDocument: 'after' => sẽ trả về bản ghi sau khi update
       );
 
     return result.value;
@@ -93,18 +91,18 @@ const getFullBoard = async (boardId) => {
         {
           $lookup: {
             from: ColumnModel.columnCollectionName, //collection name.
-            localField: "_id",
-            foreignField: "boardId",
-            as: "columns", // name return
+            localField: '_id',
+            foreignField: 'boardId',
+            as: 'columns', // name return
           },
         },
         // get card in columns in board
         {
           $lookup: {
             from: CardModel.cardCollectionName, //collection name.
-            localField: "_id",
-            foreignField: "boardId",
-            as: "cards", // name return
+            localField: '_id',
+            foreignField: 'boardId',
+            as: 'cards', // name return
           },
         },
       ])
@@ -116,9 +114,28 @@ const getFullBoard = async (boardId) => {
   }
 };
 
+const update = async (id, data) => {
+  try {
+    const updateData = { ...data };
+
+    const result = await getDB()
+      .collection(boardCollectionName)
+      .findOneAndUpdate(
+        { _id: ObjectId(id) }, // tìm item có id...
+        { $set: updateData }, // update data
+        { returnDocument: 'after' }, // returnDocument: "after" => sẽ trả về bản ghi sau khi update
+      );
+
+    return result.value;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const BoardModel = {
   createNew,
   getFullBoard,
   pushColumnOrder,
   findOneById,
+  update,
 };

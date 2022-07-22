@@ -1,5 +1,5 @@
-import { ColumnService } from "*/services/column.service";
-import { HttpStatusCode } from "*/utilities/constants_http";
+import { ColumnService } from '*/services/column.service';
+import { HttpStatusCode } from '*/utilities/constants_http';
 
 const createNew = async (req, res) => {
   try {
@@ -16,8 +16,6 @@ const createNew = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
-    console.log("controller: ", req.body);
 
     const result = await ColumnService.update(id, req.body);
     res.status(HttpStatusCode.OK).json(result);
