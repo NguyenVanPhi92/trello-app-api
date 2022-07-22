@@ -1,9 +1,10 @@
-import Joi from "joi";
-import { getDB } from "*/config/mongodb";
-import { ObjectId } from "mongodb";
+import Joi from 'joi';
+import { getDB } from '*/config/mongodb';
+import { ObjectId } from 'mongodb';
 
+// SCHEMA
 //Define Cards collection
-const cardCollectionName = "cards";
+const cardCollectionName = 'cards';
 const cardCollectionSchema = Joi.object({
   boardId: Joi.string().required(), // Also objectId when create new
   columnId: Joi.string().required(), // Also objectId when create new
@@ -14,6 +15,7 @@ const cardCollectionSchema = Joi.object({
   _destroy: Joi.boolean().default(false),
 });
 
+// METHOD
 // validate data receive from client
 const validateSchema = async (data) => {
   return await cardCollectionSchema.validateAsync(data, {
@@ -45,11 +47,30 @@ const createNew = async (data) => {
       columnId: ObjectId(validatedValue.columnId),
     };
 
-    const result = await getDB()
-      .collection(cardCollectionName)
-      .insertOne(insertValue);
+    const result = await getDB().collection(cardCollectionName).insertOne(insertValue);
 
     return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const update = async (id, data) => {
+  try {
+    const updateData = { ...data };
+
+    if (data.boardId) updateData.boardId = ObjectId(data.boardId);
+    if (data.columnId) updateData.columnId = ObjectId(data.columnId);
+
+    const result = await getDB()
+      .collection(cardCollectionName)
+      .findOneAndUpdate(
+        { _id: ObjectId(id) }, // tìm item có id...
+        { $set: updateData }, // update data
+        { returnDocument: 'after' }, // returnDocument: "after" => sẽ trả về bản ghi sau khi update
+      );
+
+    return result.value;
   } catch (error) {
     throw new Error(error);
   }
@@ -67,7 +88,7 @@ const deleteMany = async (ids) => {
       .collection(cardCollectionName)
       .updateMany(
         { _id: { $in: transformIds } }, // update những th có id trong mảng ids
-        { $set: { _destroy: true } }
+        { $set: { _destroy: true } },
       );
 
     return result;
@@ -81,4 +102,5 @@ export const CardModel = {
   createNew,
   deleteMany,
   findOneById,
+  update,
 };

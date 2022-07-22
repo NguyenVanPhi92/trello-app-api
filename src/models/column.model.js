@@ -1,9 +1,9 @@
-import { getDB } from "*/config/mongodb";
-import Joi from "joi";
-import { ObjectId } from "mongodb";
+import { getDB } from '*/config/mongodb';
+import Joi from 'joi';
+import { ObjectId } from 'mongodb';
 
 //Define Column collection
-const columnCollectionName = "columns";
+const columnCollectionName = 'columns';
 const columnCollectionSchema = Joi.object({
   boardId: Joi.string().required(), // Also objectId when create new
   title: Joi.string().required().min(3).max(20).trim(),
@@ -29,11 +29,8 @@ const createNew = async (data) => {
       ...validatedValue,
       boardId: ObjectId(validatedValue.boardId),
     };
-    console.log(insertValue);
 
-    const result = await getDB()
-      .collection(columnCollectionName)
-      .insertOne(insertValue);
+    const result = await getDB().collection(columnCollectionName).insertOne(insertValue);
 
     return result;
   } catch (error) {
@@ -68,7 +65,7 @@ const pushCardOrder = async (columnId, newCardId) => {
       .findOneAndUpdate(
         { _id: ObjectId(columnId) },
         { $push: { cardOrder: newCardId } },
-        { returnDocument: "after" } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+        { returnDocument: 'after' }, // returnDocument: "after" => sẽ trả về bản ghi sau khi update
       );
 
     return result.value;
@@ -79,16 +76,18 @@ const pushCardOrder = async (columnId, newCardId) => {
 
 const update = async (id, data) => {
   try {
-    const updateData = await { ...data, boardId: ObjectId(data.boardId) };
-    console.log("updateData : ", updateData.title);
+    const updateData = { ...data };
+
+    if (data.boardId) updateData.boardId = ObjectId(data.boardId);
+
     const result = await getDB()
       .collection(columnCollectionName)
       .findOneAndUpdate(
         { _id: ObjectId(id) }, // tìm item có id...
         { $set: updateData }, // update data
-        { returnDocument: "after" } // returnOriginal=false => sẽ trả về bản ghi sau khi update
+        { returnDocument: 'after' }, // returnDocument: "after" => sẽ trả về bản ghi sau khi update
       );
-    console.log("updateData model: ", result.value.title);
+
     return result.value;
   } catch (error) {
     throw new Error(error);
