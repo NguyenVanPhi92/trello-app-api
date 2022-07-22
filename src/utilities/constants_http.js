@@ -1,4 +1,4 @@
-export const WHITELIST_DOMAINS = ['http://localhost:3000', 'https://trello-patrickdev.web.app/'];
+export const WHITELIST_DOMAINS = ['http://localhost:3000', 'https://trello-patrickdev.web.app'];
 export const HttpStatusCode = {
   OK: 200,
   BAD_REQUEST: 400,
