@@ -30,7 +30,7 @@ const bootServer = () => {
   // });
 
   // SUPPORT HEROKU DEPLOY
-  app.listen(process.env.POST, () => {
+  app.listen(process.env.PORT, () => {
     console.log(`server is running is port: ${process.env.PORT}`);
   });
 };
